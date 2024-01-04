@@ -69,7 +69,7 @@ class Program
 
     static async Task Main(string[] args)
     {
-        Task<string> connectingTask = Task.Run(() => db_connection("localhost", "kkkonyvtar", "root", "root"));
+        Task<string> connectingTask = Task.Run(() => db_connection("bfehuno3vjcd8qb1iyak-mysql.services.clever-cloud.com", "bfehuno3vjcd8qb1iyak", "ufxgthjtwc8fo5x3", "uqhVijgTR93wchcttD7e"));
         Task<string> readTask = Task.Run(() => GetDevices(connection));
 
         while (!connectingTask.IsCompleted) //Betöltési képernyő
@@ -89,7 +89,7 @@ class Program
         string read_result = await readTask;
 
         Console.Write(connection_result);
-        Console.Write(read_result);
+        //Console.Write(read_result);
 
         Thread.Sleep(3000); //Ez mind csak debug
 
