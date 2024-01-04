@@ -1,4 +1,6 @@
-﻿using MySql.Data.MySqlClient;
+﻿using System;
+using System.Data.Common;
+using MySql.Data.MySqlClient;
 
 namespace KKKonyvtar;
 
@@ -19,7 +21,7 @@ class Program
     {
         devices = new List<Devices>();
 
-        try
+        try 
         {
             connection.Open();
 
@@ -40,11 +42,11 @@ class Program
             reader.Close();
             connection.Close();
 
-            return "\nDevices loaded!"; //Debug miatt ez a függvény visszatér a lekérdezési, majd a feltöltési kísérlet eredményével
+            return "\nDevices loaded"; //Debug miatt ez a függvény visszatér a lekérdezési, majd a feltöltési kísérlet eredményével
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}"; //Valamiért még akkor is ezzel tér vissza, amikor sikeres volt minden
+            return ex.Message;
         }
     }
 
@@ -58,11 +60,11 @@ class Program
             {
                 connection.Open(); //Ahoz, hogy a függvény visszatérjen a csatlakozási kísérlet eredményével, ahoz nyitnom kellett egy kapcsolatot.
                 connection.Close(); //Mivel erre a kapcsolatra nincs szükség, így egyből be is zárom
-                return "Connceted!";
+                return "Connceted";
             }
             catch (Exception ex)
             {
-                return $"Error: {ex.Message}";
+                return ex.Message;
             }
         }
     }
@@ -70,11 +72,18 @@ class Program
     static async Task Main(string[] args)
     {
         Task<string> connectingTask = Task.Run(() => db_connection("bfehuno3vjcd8qb1iyak-mysql.services.clever-cloud.com", "bfehuno3vjcd8qb1iyak", "ufxgthjtwc8fo5x3", "uqhVijgTR93wchcttD7e"));
-        Task<string> readTask = Task.Run(() => GetDevices(connection));
+
+        Console.SetCursorPosition((Console.WindowWidth - "+------------------------------+".Length) / 2, Console.CursorTop);
+        Console.WriteLine("+------------------------------+");
+        Console.SetCursorPosition((Console.WindowWidth - "|     Üdvözöl a KKKönyvtár     |".Length) / 2, Console.CursorTop);
+        Console.WriteLine("|     Üdvözöl a KKKönyvtár     |");
+        Console.SetCursorPosition((Console.WindowWidth - "+------------------------------+".Length) / 2, Console.CursorTop);
+        Console.WriteLine("+------------------------------+");
 
         while (!connectingTask.IsCompleted) //Betöltési képernyő
         {
-            Console.Write("Loading");
+            Console.SetCursorPosition((Console.WindowWidth - "Betöltés...".Length) / 2, Console.CursorTop);
+            Console.Write("Betöltés");
             Thread.Sleep(500);
             Console.Write(".");
             Thread.Sleep(500);
@@ -86,19 +95,25 @@ class Program
         }
         
         string connection_result = await connectingTask;
+
+        Task<string> readTask = Task.Run(() => GetDevices(connection));
         string read_result = await readTask;
 
-        Console.Write(connection_result);
-        //Console.Write(read_result);
+        //Console.Write(connection_result);
+        Console.Write(read_result);
 
-        Thread.Sleep(3000); //Ez mind csak debug
+        /*Console.SetCursorPosition(0, Console.WindowHeight);
+        Console.Write("DEBUG | ");
+        Console.BackgroundColor = ConsoleColor.Green;
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write("OK");
+        Console.ResetColor();
+        Console.Write($": {read_result}");
 
-        GetDevices(connection);
-
-        foreach (Devices device in devices)
+        /*foreach (Devices device in devices)
         {
             Console.WriteLine($"ID: {device.Id}, Device: {device.DeviceName}, Quantity: {device.Qty}");
-        }
+        }*/
 
     }
 }
