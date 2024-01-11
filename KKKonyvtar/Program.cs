@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data.Common;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 
 namespace KKKonyvtar;
 
@@ -14,7 +12,6 @@ class Program
     }
 
     static MySqlConnection connection; //A MySQL kapcsolat globalizálása
-
     static List<Devices> devices; //Eszközök globalizálása
 
     static string GetDevices(MySqlConnection connection) //Ebben a függvényben kérem le az eszközöket és töltöm fel őket az objektumba 
@@ -42,11 +39,11 @@ class Program
             reader.Close();
             connection.Close();
 
-            return "\nDevices loaded"; //Debug miatt ez a függvény visszatér a lekérdezési, majd a feltöltési kísérlet eredményével
+            return "OK: Devices loaded"; //Debug miatt ez a függvény visszatér a lekérdezési, majd a feltöltési kísérlet eredményével
         }
         catch (Exception ex)
         {
-            return ex.Message;
+            return $"ERROR: {ex.Message}";
         }
     }
 
@@ -60,11 +57,11 @@ class Program
             {
                 connection.Open(); //Ahoz, hogy a függvény visszatérjen a csatlakozási kísérlet eredményével, ahoz nyitnom kellett egy kapcsolatot.
                 connection.Close(); //Mivel erre a kapcsolatra nincs szükség, így egyből be is zárom
-                return "Connceted";
+                return "OK: Connceted";
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                return $"ERROR: {ex.Message}";
             }
         }
     }
@@ -93,28 +90,16 @@ class Program
             Thread.Sleep(500);
             Console.Write("\r" + new string(' ', Console.WindowWidth) + "\r"); //Ezzel csak egyetlen sort törlök a terminálban
         }
-        
-        string connection_result = await connectingTask;
+
+        string connectionResult = await connectingTask;
 
         Task<string> readTask = Task.Run(() => GetDevices(connection));
-        string read_result = await readTask;
-
-        //Console.Write(connection_result);
-        Console.Write(read_result);
-
-        /*Console.SetCursorPosition(0, Console.WindowHeight);
-        Console.Write("DEBUG | ");
-        Console.BackgroundColor = ConsoleColor.Green;
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.Write("OK");
-        Console.ResetColor();
-        Console.Write($": {read_result}");
+        string readResult = await readTask;
 
         /*foreach (Devices device in devices)
         {
             Console.WriteLine($"ID: {device.Id}, Device: {device.DeviceName}, Quantity: {device.Qty}");
         }*/
-
     }
 }
 
