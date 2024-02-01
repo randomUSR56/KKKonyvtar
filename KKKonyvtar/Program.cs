@@ -66,6 +66,46 @@ class Program
         }
     }
 
+    static void AddDevice(MySqlConnection connection, Devices device)
+        {
+            try
+            {
+                connection.Open();
+
+                string sql = $"INSERT INTO devices (DeviceName, Qty) VALUES ('{device.DeviceName}', {device.Qty})";
+                MySqlCommand command = new MySqlCommand(sql, connection);
+                command.ExecuteNonQuery();
+
+                connection.Close();
+
+                Console.WriteLine("Device added successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding device: {ex.Message}");
+            }
+        }
+
+        static void DeleteDevice(MySqlConnection connection, int deviceId)
+        {
+            try
+            {
+                connection.Open();
+
+                string sql = $"DELETE FROM devices WHERE Id = {deviceId}";
+                MySqlCommand command = new MySqlCommand(sql, connection);
+                command.ExecuteNonQuery();
+
+                connection.Close();
+
+                Console.WriteLine("Device deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting device: {ex.Message}");
+            }
+        }
+
     static async Task Main(string[] args)
     {
         Task<string> connectingTask = Task.Run(() => db_connection("bfehuno3vjcd8qb1iyak-mysql.services.clever-cloud.com", "bfehuno3vjcd8qb1iyak", "ufxgthjtwc8fo5x3", "uqhVijgTR93wchcttD7e"));
@@ -96,10 +136,75 @@ class Program
         Task<string> readTask = Task.Run(() => GetDevices(connection));
         string readResult = await readTask;
 
-        /*foreach (Devices device in devices)
+        string[] menuItems = { "Add device", "Delete device", "Exit" };
+        int selectedIndex = 0;
+        bool menuSelected = false;
+
+        while (!menuSelected)
         {
-            Console.WriteLine($"ID: {device.Id}, Device: {device.DeviceName}, Quantity: {device.Qty}");
-        }*/
+            Console.Clear();
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (i == selectedIndex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green; // Change the color of the selected item
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White; // Reset the color for other items
+                }
+
+                Console.WriteLine($"{i + 1}. {(i == selectedIndex ? "> " : "")}{menuItems[i]}");
+            }
+
+            ConsoleKeyInfo keyInfo = Console.ReadKey();
+
+            switch (keyInfo.Key)
+            {
+                case ConsoleKey.UpArrow:
+                    selectedIndex = (selectedIndex == 0) ? 2 : selectedIndex - 1;
+                    break;
+
+                case ConsoleKey.DownArrow:
+                    selectedIndex = (selectedIndex == 2) ? 0 : selectedIndex + 1;
+                    break;
+
+                case ConsoleKey.Enter:
+                    menuSelected = true;
+                    break;
+            }
+        }
+
+        switch (selectedIndex)
+        {
+            case 0:
+                Console.Write("Enter device name: ");
+                string deviceName = Console.ReadLine();
+                Console.Write("Enter quantity: ");
+                int quantity = int.Parse(Console.ReadLine());
+
+                Devices newDevice = new Devices
+                {
+                    DeviceName = deviceName,
+                    Qty = quantity
+                };
+
+                AddDevice(connection, newDevice);
+                break;
+
+            case 1:
+                Console.Write("Enter device ID to delete: ");
+                int deviceId = int.Parse(Console.ReadLine());
+
+                DeleteDevice(connection, deviceId);
+                break;
+
+            case 2:
+                Console.WriteLine("Exiting...");
+                return;
+        }
+
+        Console.ResetColor(); // Reset the console color after the menu selection
     }
 }
-
