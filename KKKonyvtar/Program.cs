@@ -106,6 +106,32 @@ class Program
             Console.WriteLine($"Error deleting device: {ex.Message}");
         }
     }
+    static void NewRent(MySqlConnection connection, int deviceId)
+    {
+        try
+        {
+            connection.Open();
+
+            string sql = $"UPDATE devices SET qty = qty - 1 WHERE Id = {deviceId} AND qty > 0";
+            MySqlCommand command = new MySqlCommand(sql, connection);
+            int rowsAffected = command.ExecuteNonQuery();
+
+            connection.Close();
+
+            if (rowsAffected > 0)
+            {
+                Console.WriteLine("Device rented successfully");
+            }
+            else
+            {
+                Console.WriteLine("Unable to rent device: Not enough quantity or device not found");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error renting device: {ex.Message}");
+        }
+    }
 
     static void DevicesTable()
     {
@@ -201,6 +227,7 @@ class Program
                                 Console.WriteLine("| KKKönyvtár - Új Kölcsönzés |");
                                 Console.SetCursorPosition((Console.WindowWidth - "+----------------------------+".Length) / 2, Console.CursorTop);
                                 Console.WriteLine("+----------------------------+");
+                                NewRent(connection, 3);
                                 Console.ReadKey();
                                 break;
                             case 1:
