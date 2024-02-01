@@ -8,12 +8,22 @@ class Program
     public class Devices
     {
         public int Id { get; set; }
-        public string DeviceName { get; set; }
+        public string? DeviceName { get; set; }
         public int Qty { get; set; }
     }
 
-    static MySqlConnection connection; //A MySQL kapcsolat globalizálása
-    static List<Devices> devices; //Eszközök globalizálása
+    static MySqlConnection? connection; //A MySQL kapcsolat globalizálása
+    static List<Devices>? devices; //Eszközök globalizálása
+
+    static void Header(string title) { //Ez a függvény csak egy fejlécet ír ki a terminálba{
+        Console.Clear();
+        Console.SetCursorPosition((Console.WindowWidth - $"+{new string('-', $"|  KKKönyvtár - {title}  |".Length)}+".Length) / 2, Console.CursorTop);
+        Console.WriteLine($"+{new string('-', $"|  KKKönyvtár - {title}  |".Length)}+");
+        Console.SetCursorPosition((Console.WindowWidth - $"|   KKKönyvtár - {title}   |".Length) / 2, Console.CursorTop);
+        Console.WriteLine($"|   KKKönyvtár - {title}   |");
+        Console.SetCursorPosition((Console.WindowWidth - $"+{new string('-', $"|  KKKönyvtár - {title}  |".Length)}+".Length) / 2, Console.CursorTop);
+        Console.WriteLine($"+{new string('-', $"|  KKKönyvtár - {title}  |".Length)}+");
+    }
 
     static string GetDevices(MySqlConnection connection) //Ebben a függvényben kérem le az eszközöket és töltöm fel őket az objektumba 
     {
@@ -137,12 +147,7 @@ class Program
     {
         Task<string> readTask = Task.Run(() => GetDevices(connection));
 
-        Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
-        Console.WriteLine("+-----------------------+");
-        Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Eszközök |".Length) / 2, Console.CursorTop);
-        Console.WriteLine("| KKKönyvtár - Eszközök |");
-        Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
-        Console.WriteLine("+-----------------------+");
+        Header("Eszközök");
 
         while (!readTask.IsCompleted) //Betöltési képernyő
         {
@@ -187,20 +192,11 @@ class Program
     {
         string[] subMenuItems = { "Új Kölcsönzés", "Meglévő Kölcsönzések", "Vissza" };
         int selectedIndex = 0;
-        bool backSelected = false;
-
         while (true)
         {
-            Console.Clear();
-
             Console.ForegroundColor = ConsoleColor.Black;
 
-            Console.SetCursorPosition((Console.WindowWidth - "+-------------------------+".Length) / 2, Console.CursorTop);
-            Console.WriteLine("+-------------------------+");
-            Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Kölcsönzés |".Length) / 2, Console.CursorTop);
-            Console.WriteLine("| KKKönyvtár - Kölcsönzés |");
-            Console.SetCursorPosition((Console.WindowWidth - "+-------------------------+".Length) / 2, Console.CursorTop);
-            Console.WriteLine("+-------------------------+");
+            Header("Kölcsönzés");
 
             for (int i = 0; i < 3; i++)
             {
@@ -233,68 +229,46 @@ class Program
                     break;
 
                 case ConsoleKey.Enter:
-                    if (selectedIndex == 2)
+                    switch (selectedIndex)
                     {
-                        backSelected = true;
-                        break;
-                    }
-                    else
-                    {
-                        switch (selectedIndex)
-                        {
-                            case 0:
-                                Console.Clear();
-                                Console.SetCursorPosition((Console.WindowWidth - "+----------------------------+".Length) / 2, Console.CursorTop);
-                                Console.WriteLine("+----------------------------+");
-                                Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Új Kölcsönzés |".Length) / 2, Console.CursorTop);
-                                Console.WriteLine("| KKKönyvtár - Új Kölcsönzés |");
-                                Console.SetCursorPosition((Console.WindowWidth - "+----------------------------+".Length) / 2, Console.CursorTop);
-                                Console.WriteLine("+----------------------------+");
-                                NewRent(connection, 3);
-                                Console.ReadKey();
-                                break;
-                            case 1:
-                                Console.Clear();
-                                Console.SetCursorPosition((Console.WindowWidth - "+-----------------------------------+".Length) / 2, Console.CursorTop);
-                                Console.WriteLine("+-----------------------------------+");
-                                Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Meglévő Kölcsönzések |".Length) / 2, Console.CursorTop);
-                                Console.WriteLine("| KKKönyvtár - Meglévő Kölcsönzések |");
-                                Console.SetCursorPosition((Console.WindowWidth - "+-----------------------------------+".Length) / 2, Console.CursorTop);
-                                Console.WriteLine("+-----------------------------------+");
-                                Console.ReadKey();
-                                break;
+                        case 0:
+                            Header("Új Kölcsönzés");
+                            NewRent(connection, 3);
+                            Console.ReadKey();
+                            break;
+                        case 1:
+                            Header("Meglévő Kölcsönzések");
+                            Console.ReadKey();
+                            break;
 
-                            case 2:
-                                backSelected = true;
-                                break;
-                        }
-                        break;
+                        case 2:
+                            return;
                     }
-            }
-            if (backSelected)
-            {
-                return;
+                    break;
             }
         }
     }
 
-    static void MainMenu(int selectedIndex)
+    static async void MainMenu(int selectedIndex)
     {
         switch (selectedIndex)
         {
             case 0:
                 Console.Clear();
-                DevicesTable();
+                await DevicesTable();
                 Console.ReadKey();
                 break;
             case 1:
                 Console.Clear();
                 RentDevices();
                 break;
-
             case 2:
-                Console.WriteLine("Exiting...");
-                return;
+                Header("Admin");
+                Console.ReadKey();
+                break;
+            case 3:
+                Environment.Exit(0);
+                break;
         }
     }
 
@@ -302,6 +276,7 @@ class Program
     {
         Task<string> connectingTask = Task.Run(() => db_connection("bfehuno3vjcd8qb1iyak-mysql.services.clever-cloud.com", "bfehuno3vjcd8qb1iyak", "ufxgthjtwc8fo5x3", "uqhVijgTR93wchcttD7e"));
 
+        Console.Clear();
         Console.SetCursorPosition((Console.WindowWidth - "+------------------------------+".Length) / 2, Console.CursorTop);
         Console.WriteLine("+------------------------------+");
         Console.SetCursorPosition((Console.WindowWidth - "|     Üdvözöl a KKKönyvtár     |".Length) / 2, Console.CursorTop);
@@ -345,7 +320,7 @@ class Program
             Console.SetCursorPosition((Console.WindowWidth - "+------------------------------+".Length) / 2, Console.CursorTop);
             Console.WriteLine("+------------------------------+");
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < menuItems.Length; i++)
             {
                 if (i == selectedIndex)
                 {
@@ -368,11 +343,11 @@ class Program
             switch (keyInfo.Key)
             {
                 case ConsoleKey.UpArrow:
-                    selectedIndex = (selectedIndex == 0) ? 2 : selectedIndex - 1;
+                    selectedIndex = (selectedIndex == 0) ? menuItems.Length - 1 : selectedIndex - 1;
                     break;
 
                 case ConsoleKey.DownArrow:
-                    selectedIndex = (selectedIndex == 2) ? 0 : selectedIndex + 1;
+                    selectedIndex = (selectedIndex == menuItems.Length - 1) ? 0 : selectedIndex + 1;
                     break;
 
                 case ConsoleKey.Enter:
