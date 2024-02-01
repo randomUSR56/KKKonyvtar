@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using System;
+using MySql.Data.MySqlClient;
 
 namespace KKKonyvtar;
 
@@ -106,50 +107,139 @@ class Program
         }
     }
 
+    static void DevicesTable()
+    {
+        Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
+        Console.WriteLine("+-----------------------+");
+        Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Eszközök |".Length) / 2, Console.CursorTop);
+        Console.WriteLine("| KKKönyvtár - Eszközök |");
+        Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
+        Console.WriteLine("+-----------------------+");
+
+        Console.SetCursorPosition((Console.WindowWidth - "+---------------------+---------------------------+---------------------+".Length) / 2, Console.CursorTop);
+        Console.WriteLine("+----------------------+---------------------------+--------------------+");
+        Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
+        Console.WriteLine($"| Azonosító {"| Eszköz neve",24} {"| Darabszám",25} {"|",10}");
+        Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
+        Console.WriteLine("+----------------------+---------------------------+--------------------+");
+
+        foreach (Devices device in devices)
+        {
+            Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
+            Console.WriteLine($"| {device.Id} {"| ",21} {device.DeviceName,24} | {device.Qty,18} |");
+        }
+
+        Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
+        Console.WriteLine("+----------------------+---------------------------+--------------------+");
+        Console.WriteLine("\nNyomjon egy billentyűt a kilépéshez...");
+    }
+
+    static void RentDevices()
+    {
+        string[] subMenuItems = { "Új Kölcsönzés", "Meglévő Kölcsönzések", "Vissza" };
+        int selectedIndex = 0;
+        bool backSelected = false;
+
+        while (true)
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Black;
+
+            Console.SetCursorPosition((Console.WindowWidth - "+-------------------------+".Length) / 2, Console.CursorTop);
+            Console.WriteLine("+-------------------------+");
+            Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Kölcsönzés |".Length) / 2, Console.CursorTop);
+            Console.WriteLine("| KKKönyvtár - Kölcsönzés |");
+            Console.SetCursorPosition((Console.WindowWidth - "+-------------------------+".Length) / 2, Console.CursorTop);
+            Console.WriteLine("+-------------------------+");
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (i == selectedIndex)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed; // Change the color of the selected item
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Black; // Reset the color for other items
+                }
+
+                Console.WriteLine("");
+                Console.SetCursorPosition((Console.WindowWidth - $"| {subMenuItems[i]} |".Length) / 2, Console.CursorTop);
+                Console.WriteLine($"| {subMenuItems[i]} |");
+
+                Console.ResetColor();
+            }
+
+            ConsoleKeyInfo keyInfo = Console.ReadKey();
+
+            switch (keyInfo.Key)
+            {
+                case ConsoleKey.UpArrow:
+                    selectedIndex = (selectedIndex == 0) ? 2 : selectedIndex - 1;
+                    break;
+
+                case ConsoleKey.DownArrow:
+                    selectedIndex = (selectedIndex == 2) ? 0 : selectedIndex + 1;
+                    break;
+
+                case ConsoleKey.Enter:
+                    if (selectedIndex == 2)
+                    {
+                        backSelected = true;
+                        break;
+                    }
+                    else
+                    {
+                        switch (selectedIndex)
+                        {
+                            case 0:
+                                Console.Clear();
+                                Console.SetCursorPosition((Console.WindowWidth - "+----------------------------+".Length) / 2, Console.CursorTop);
+                                Console.WriteLine("+----------------------------+");
+                                Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Új Kölcsönzés |".Length) / 2, Console.CursorTop);
+                                Console.WriteLine("| KKKönyvtár - Új Kölcsönzés |");
+                                Console.SetCursorPosition((Console.WindowWidth - "+----------------------------+".Length) / 2, Console.CursorTop);
+                                Console.WriteLine("+----------------------------+");
+                                Console.ReadKey();
+                                break;
+                            case 1:
+                                Console.Clear();
+                                Console.SetCursorPosition((Console.WindowWidth - "+-----------------------------------+".Length) / 2, Console.CursorTop);
+                                Console.WriteLine("+-----------------------------------+");
+                                Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Meglévő Kölcsönzések |".Length) / 2, Console.CursorTop);
+                                Console.WriteLine("| KKKönyvtár - Meglévő Kölcsönzések |");
+                                Console.SetCursorPosition((Console.WindowWidth - "+-----------------------------------+".Length) / 2, Console.CursorTop);
+                                Console.WriteLine("+-----------------------------------+");
+                                Console.ReadKey();
+                                break;
+
+                            case 2:
+                                backSelected = true;
+                                break;
+                        }
+                        break;
+                    }
+            }
+            if (backSelected)
+            {
+                return;
+            }
+        }
+    }
+
     static void MainMenu(int selectedIndex)
     {
         switch (selectedIndex)
         {
             case 0:
                 Console.Clear();
-
-                Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
-                Console.WriteLine("+-----------------------+");
-                Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Eszközök |".Length) / 2, Console.CursorTop);
-                Console.WriteLine("| KKKönyvtár - Eszközök |");
-                Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
-                Console.WriteLine("+-----------------------+");
-
-                Console.SetCursorPosition((Console.WindowWidth - "+---------------------+---------------------------+---------------------+".Length) / 2, Console.CursorTop);
-                Console.WriteLine("+----------------------+---------------------------+--------------------+");
-                Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
-                Console.WriteLine($"| Azonosító {"| Eszköz neve",24} {"| Darabszám",25} {"|",10}");
-                Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
-                Console.WriteLine("+----------------------+---------------------------+--------------------+");
-
-                foreach (Devices device in devices)
-                {
-                    Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
-                    Console.WriteLine($"| {device.Id} {"| ",21} {device.DeviceName,24} | {device.Qty,18} |");
-                }
-
-                Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
-                Console.WriteLine("+----------------------+---------------------------+--------------------+");
-                Console.WriteLine("\nNyomjon egy billentyűt a kilépéshez...");
-
+                DevicesTable();
                 Console.ReadKey();
                 break;
             case 1:
                 Console.Clear();
-
-                Console.SetCursorPosition((Console.WindowWidth - "+-------------------------+".Length) / 2, Console.CursorTop);
-                Console.WriteLine("+-------------------------+");
-                Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Kölcsönzés |".Length) / 2, Console.CursorTop);
-                Console.WriteLine("| KKKönyvtár - Kölcsönzés |");
-                Console.SetCursorPosition((Console.WindowWidth - "+-------------------------+".Length) / 2, Console.CursorTop);
-                Console.WriteLine("+-------------------------+");
-
-                Console.ReadKey();
+                RentDevices();
                 break;
 
             case 2:
@@ -188,7 +278,7 @@ class Program
         Task<string> readTask = Task.Run(() => GetDevices(connection));
         string readResult = await readTask;
 
-        string[] menuItems = { "Eszközök", "Kölcsönzés", "Admin" };
+        string[] menuItems = { "Eszközök", "Kölcsönzés", "Admin", "Kilépés" };
         int selectedIndex = 0;
         bool menuSelected = false;
 
