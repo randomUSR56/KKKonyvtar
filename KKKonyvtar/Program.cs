@@ -133,14 +133,30 @@ class Program
         }
     }
 
-    static void DevicesTable()
+    static async Task DevicesTable()
     {
+        Task<string> readTask = Task.Run(() => GetDevices(connection));
+
         Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
         Console.WriteLine("+-----------------------+");
         Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Eszközök |".Length) / 2, Console.CursorTop);
         Console.WriteLine("| KKKönyvtár - Eszközök |");
         Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
         Console.WriteLine("+-----------------------+");
+
+        while (!readTask.IsCompleted) //Betöltési képernyő
+        {
+            Console.SetCursorPosition((Console.WindowWidth - "Betöltés...".Length) / 2, 4);
+            Console.Write("Betöltés");
+            Thread.Sleep(500);
+            Console.Write(".");
+            Thread.Sleep(500);
+            Console.Write(".");
+            Thread.Sleep(500);
+            Console.Write(".");
+            Thread.Sleep(500);
+            Console.Write("\r" + new string(' ', Console.WindowWidth) + "\r"); //Ezzel csak egyetlen sort törlök a terminálban
+        }
 
         Console.SetCursorPosition((Console.WindowWidth - "+---------------------+---------------------------+---------------------+".Length) / 2, Console.CursorTop);
         Console.WriteLine("+----------------------+---------------------------+--------------------+");
@@ -157,7 +173,14 @@ class Program
 
         Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
         Console.WriteLine("+----------------------+---------------------------+--------------------+");
-        Console.WriteLine("\nNyomjon egy billentyűt a kilépéshez...");
+
+        Console.ForegroundColor = ConsoleColor.DarkRed;
+        Console.WriteLine($"");
+        Console.SetCursorPosition((Console.WindowWidth - $"| Vissza |".Length) / 2, Console.CursorTop);
+        Console.WriteLine($"| Vissza |");
+        Console.ResetColor();
+
+        string readResult = await readTask;
     }
 
     static void RentDevices()
