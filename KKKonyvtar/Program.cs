@@ -86,25 +86,77 @@ class Program
             }
         }
 
-        static void DeleteDevice(MySqlConnection connection, int deviceId)
+    static void DeleteDevice(MySqlConnection connection, int deviceId)
+    {
+        try
         {
-            try
-            {
-                connection.Open();
+            connection.Open();
 
-                string sql = $"DELETE FROM devices WHERE Id = {deviceId}";
-                MySqlCommand command = new MySqlCommand(sql, connection);
-                command.ExecuteNonQuery();
+            string sql = $"DELETE FROM devices WHERE Id = {deviceId}";
+            MySqlCommand command = new MySqlCommand(sql, connection);
+            command.ExecuteNonQuery();
 
-                connection.Close();
+            connection.Close();
 
-                Console.WriteLine("Device deleted successfully");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error deleting device: {ex.Message}");
-            }
+            Console.WriteLine("Device deleted successfully");
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting device: {ex.Message}");
+        }
+    }
+
+    static void MainMenu(int selectedIndex)
+    {
+        switch (selectedIndex)
+        {
+            case 0:
+                Console.Clear();
+
+                Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
+                Console.WriteLine("+-----------------------+");
+                Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Eszközök |".Length) / 2, Console.CursorTop);
+                Console.WriteLine("| KKKönyvtár - Eszközök |");
+                Console.SetCursorPosition((Console.WindowWidth - "+-----------------------+".Length) / 2, Console.CursorTop);
+                Console.WriteLine("+-----------------------+");
+
+                Console.SetCursorPosition((Console.WindowWidth - "+---------------------+---------------------------+---------------------+".Length) / 2, Console.CursorTop);
+                Console.WriteLine("+----------------------+---------------------------+--------------------+");
+                Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
+                Console.WriteLine($"| Azonosító {"| Eszköz neve",24} {"| Darabszám",25} {"|",10}");
+                Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
+                Console.WriteLine("+----------------------+---------------------------+--------------------+");
+
+                foreach (Devices device in devices)
+                {
+                    Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
+                    Console.WriteLine($"| {device.Id} {"| ",21} {device.DeviceName,24} | {device.Qty,18} |");
+                }
+
+                Console.SetCursorPosition((Console.WindowWidth - "+----------------------+---------------------------+--------------------+".Length) / 2, Console.CursorTop);
+                Console.WriteLine("+----------------------+---------------------------+--------------------+");
+                Console.WriteLine("\nNyomjon egy billentyűt a kilépéshez...");
+
+                Console.ReadKey();
+                break;
+            case 1:
+                Console.Clear();
+
+                Console.SetCursorPosition((Console.WindowWidth - "+-------------------------+".Length) / 2, Console.CursorTop);
+                Console.WriteLine("+-------------------------+");
+                Console.SetCursorPosition((Console.WindowWidth - "| KKKönyvtár - Kölcsönzés |".Length) / 2, Console.CursorTop);
+                Console.WriteLine("| KKKönyvtár - Kölcsönzés |");
+                Console.SetCursorPosition((Console.WindowWidth - "+-------------------------+".Length) / 2, Console.CursorTop);
+                Console.WriteLine("+-------------------------+");
+
+                Console.ReadKey();
+                break;
+
+            case 2:
+                Console.WriteLine("Exiting...");
+                return;
+        }
+    }
 
     static async Task Main(string[] args)
     {
@@ -119,7 +171,7 @@ class Program
 
         while (!connectingTask.IsCompleted) //Betöltési képernyő
         {
-            Console.SetCursorPosition((Console.WindowWidth - "Betöltés...".Length) / 2, Console.CursorTop);
+            Console.SetCursorPosition((Console.WindowWidth - "Betöltés...".Length) / 2, 4);
             Console.Write("Betöltés");
             Thread.Sleep(500);
             Console.Write(".");
@@ -136,7 +188,7 @@ class Program
         Task<string> readTask = Task.Run(() => GetDevices(connection));
         string readResult = await readTask;
 
-        string[] menuItems = { "Add device", "Delete device", "Exit" };
+        string[] menuItems = { "Eszközök", "Kölcsönzés", "Admin" };
         int selectedIndex = 0;
         bool menuSelected = false;
 
@@ -144,18 +196,31 @@ class Program
         {
             Console.Clear();
 
+            Console.ForegroundColor = ConsoleColor.Black;
+
+            Console.SetCursorPosition((Console.WindowWidth - "+------------------------------+".Length) / 2, Console.CursorTop);
+            Console.WriteLine("+------------------------------+");
+            Console.SetCursorPosition((Console.WindowWidth - "|     Üdvözöl a KKKönyvtár     |".Length) / 2, Console.CursorTop);
+            Console.WriteLine("|     Üdvözöl a KKKönyvtár     |");
+            Console.SetCursorPosition((Console.WindowWidth - "+------------------------------+".Length) / 2, Console.CursorTop);
+            Console.WriteLine("+------------------------------+");
+
             for (int i = 0; i < 3; i++)
             {
                 if (i == selectedIndex)
                 {
-                    Console.ForegroundColor = ConsoleColor.Green; // Change the color of the selected item
+                    Console.ForegroundColor = ConsoleColor.DarkRed; // Change the color of the selected item
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.White; // Reset the color for other items
+                    Console.ForegroundColor = ConsoleColor.Black; // Reset the color for other items
                 }
 
-                Console.WriteLine($"{i + 1}. {(i == selectedIndex ? "> " : "")}{menuItems[i]}");
+                Console.WriteLine("");
+                Console.SetCursorPosition((Console.WindowWidth - $"| {menuItems[i]} |".Length) / 2, Console.CursorTop);
+                Console.WriteLine($"| {menuItems[i]} |");
+
+                Console.ResetColor();
             }
 
             ConsoleKeyInfo keyInfo = Console.ReadKey();
@@ -171,38 +236,9 @@ class Program
                     break;
 
                 case ConsoleKey.Enter:
-                    menuSelected = true;
+                    MainMenu(selectedIndex);
                     break;
             }
-        }
-
-        switch (selectedIndex)
-        {
-            case 0:
-                Console.Write("Enter device name: ");
-                string deviceName = Console.ReadLine();
-                Console.Write("Enter quantity: ");
-                int quantity = int.Parse(Console.ReadLine());
-
-                Devices newDevice = new Devices
-                {
-                    DeviceName = deviceName,
-                    Qty = quantity
-                };
-
-                AddDevice(connection, newDevice);
-                break;
-
-            case 1:
-                Console.Write("Enter device ID to delete: ");
-                int deviceId = int.Parse(Console.ReadLine());
-
-                DeleteDevice(connection, deviceId);
-                break;
-
-            case 2:
-                Console.WriteLine("Exiting...");
-                return;
         }
 
         Console.ResetColor(); // Reset the console color after the menu selection
