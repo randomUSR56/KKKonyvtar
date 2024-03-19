@@ -274,7 +274,7 @@ class Program
 
     static async Task Main(string[] args)
     {
-        Task<string> connectingTask = Task.Run(() => db_connection("bfehuno3vjcd8qb1iyak-mysql.services.clever-cloud.com", "bfehuno3vjcd8qb1iyak", "ufxgthjtwc8fo5x3", "uqhVijgTR93wchcttD7e"));
+        Task<string> connectingTask = Task.Run(() => db_connection("localhost", "devices", "root", ""));
 
         Console.Clear();
         Console.SetCursorPosition((Console.WindowWidth - "+------------------------------+".Length) / 2, Console.CursorTop);
